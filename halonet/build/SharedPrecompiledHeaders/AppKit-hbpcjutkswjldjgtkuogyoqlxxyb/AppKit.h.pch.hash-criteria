@@ -1,0 +1,25 @@
+-x
+objective-c
+-arch
+x86_64
+-gmodules
+-fpascal-strings
+-O0
+-fno-common
+-DTBDebug
+-DOBJC_OLD_DISPATCH_PROTOTYPES=0
+-isysroot
+/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk
+-fasm-blocks
+-mmacosx-version-min=10.7
+-g
+-index-store-path
+/Users/guruprasad/Library/Developer/Xcode/DerivedData/HaloNet-alvipbawiliurdbqoopepuvmipub/Index/DataStore
+-iquote
+-iquote
+-I/Users/guruprasad/Downloads/ag2test/OpenEdge/kubara/Tunnelblick/halonet/build/Debug/include
+-F/Users/guruprasad/Downloads/ag2test/OpenEdge/kubara/Tunnelblick/halonet/build/Debug
+x86_64-apple-darwin17.3.0
+"4.2.1 Compatible Apple LLVM 9.0.0 (clang-900.0.37)"
+SDK_PRODUCT_BUILD_VERSION=17A360
+17A360
