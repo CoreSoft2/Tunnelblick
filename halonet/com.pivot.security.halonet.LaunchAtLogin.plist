@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>Label</key>
-	<string>net.tunnelblick.tunnelblick.LaunchAtLogin</string>
+	<string>net.halonet.halonet.LaunchAtLogin</string>
 	<key>ProgramArguments</key>
 	<array>
 		<string>/Applications/Tunnelblick.app/Contents/Resources/launchAtLogin.sh</string>

@@ -1,13 +1,13 @@
 /*
  * Copyright 2014, 2015, 2016 by Jonathan K. Bullard. All rights reserved.
  *
- *  This file is part of Tunnelblick.
+ *  This file is part of Halonet.
  *
- *  Tunnelblick is free software: you can redistribute it and/or modify
+ *  Halonet is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
  *  as published by the Free Software Foundation.
  *
- *  Tunnelblick is distributed in the hope that it will be useful,
+ *  Halonet is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
@@ -21,7 +21,7 @@
  
  NOTE: THIS PROGRAM MUST BE RUN AS ROOT. IT IS AN OS X LAUNCHDAEMON
  
- This daemon is used by the Tunnelblick GUI to start and stop OpenVPN instances and perform other activities that require root access.
+ This daemon is used by the Halonet GUI to start and stop OpenVPN instances and perform other activities that require root access.
  
  It is a modified version of SampleD.c, a sample program supplied by Apple.
  */
@@ -99,7 +99,7 @@ NSString * newTemporaryDirectoryPath(aslclient  asl,
     // Start of code for creating a temporary directory from http://cocoawithlove.com/2009/07/temporary-files-and-folders-in-cocoa.html
     // Modified to check for malloc returning NULL, use strlcpy, use realpath, and use more readable length for stringWithFileSystemRepresentation
     
-    NSString   * tempDirectoryTemplate = [NSTemporaryDirectory() stringByAppendingPathComponent: @"Tunnelblick-XXXXXX"];
+    NSString   * tempDirectoryTemplate = [NSTemporaryDirectory() stringByAppendingPathComponent: @"Halonet-XXXXXX"];
     const char * tempDirectoryTemplateCString = [tempDirectoryTemplate fileSystemRepresentation];
     
     size_t bufferLength = strlen(tempDirectoryTemplateCString) + 1;
@@ -155,7 +155,7 @@ NSDictionary * getSafeEnvironment(NSString * userName,
     
     // Create our own environment to guard against Shell Shock (BashDoor) and similar vulnerabilities in bash
     // (Even if bash is not being launched directly, whatever is being launched could invoke bash;
-	//  for example, tunnelblick-helper launches openvpn which can invoke bash for scripts)
+	//  for example, halonet-helper launches openvpn which can invoke bash for scripts)
 	
     NSDictionary * env = [NSDictionary dictionaryWithObjectsAndKeys:
                           STANDARD_PATH,          @"PATH",
@@ -290,12 +290,12 @@ int main(void) {
     size_t          i;
     int             kq;
     
-	static const char * command_header = TUNNELBLICKD_OPENVPNSTART_HEADER_C;
+	static const char * command_header = HalonetD_OPENVPNSTART_HEADER_C;
 	
     // Create a new ASL log
-    asl = asl_open("tunnelblickd", "Daemon", ASL_OPT_STDERR);
+    asl = asl_open("halonetd", "Daemon", ASL_OPT_STDERR);
     log_msg = asl_new(ASL_TYPE_MSG);
-    asl_set(log_msg, ASL_KEY_SENDER, "tunnelblickd");
+    asl_set(log_msg, ASL_KEY_SENDER, "halonetd");
     
     // Create a new kernel event queue that we'll use for our notification.
     // Note the use of the '%m' formatting character.
@@ -415,11 +415,11 @@ int main(void) {
 			// If the current log file is too large, start it over
 			asl_close(asl);
 			struct stat st;
-			int stat_result = stat(TUNNELBLICKD_LOG_PATH_C, &st);
+			int stat_result = stat(HalonetD_LOG_PATH_C, &st);
 			if (  0 == stat_result  ) {
 				if (  st.st_size > 100000  ) {
 					// Log file is large; replace any existing old log with it and start anew
-					rename(TUNNELBLICKD_LOG_PATH_C, TUNNELBLICKD_PREVIOUS_LOG_PATH_C);
+					rename(HalonetD_LOG_PATH_C, HalonetD_PREVIOUS_LOG_PATH_C);
 				}
 			}
             return EXIT_SUCCESS;
@@ -488,7 +488,7 @@ int main(void) {
 		
 		//***************************************************************************************
 		//***************************************************************************************
-		// Process the request by calling tunnelblick-helper and sending its status and output to the client
+		// Process the request by calling halonet-helper and sending its status and output to the client
 		
 		NSAutoreleasePool * pool = [NSAutoreleasePool new];
 		
@@ -509,15 +509,15 @@ int main(void) {
 			goto done;
 		}
 		
-		// Set up to have tunnelblick-helper to do the work
-		NSString * tunnelblickHelperPath;
+		// Set up to have halonet-helper to do the work
+		NSString * halonetHelperPath;
 		NSString * bundlePath = [[NSBundle mainBundle] bundlePath];
 		if (  [[bundlePath lastPathComponent] isEqualToString: @"Resources"]  ) {
-			tunnelblickHelperPath = [bundlePath stringByAppendingPathComponent: @"tunnelblick-helper"];
+			halonetHelperPath = [bundlePath stringByAppendingPathComponent: @"halonet-helper"];
 		} else if (  [[bundlePath pathExtension] isEqualToString: @"app"]  ) {
-			tunnelblickHelperPath = [[[bundlePath stringByAppendingPathComponent: @"Contents"]
+			halonetHelperPath = [[[bundlePath stringByAppendingPathComponent: @"Contents"]
 									  stringByAppendingPathComponent: @"Resources"]
-									 stringByAppendingPathComponent: @"tunnelblick-helper"];
+									 stringByAppendingPathComponent: @"halonet-helper"];
 		} else {
 			asl_log(asl, log_msg, ASL_LEVEL_ERR, "Invalid bundlePath = '%s'", [bundlePath UTF8String]);
 			retval = EXIT_FAILURE;
@@ -532,69 +532,69 @@ int main(void) {
 		NSMutableString * commandToDisplay = [NSMutableString stringWithString: command];
 		[commandToDisplay replaceOccurrencesOfString: @"\t" withString: @" " options: 0 range: NSMakeRange(0, [commandToDisplay length])];
 		
-		// Pretend we are the client while running tunnelblick-helper
+		// Pretend we are the client while running halonet-helper
 		if (  getegid() == client_egid  ) {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running tunnelblick-helper, setegid(%lu) unnecessary: uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running halonet-helper, setegid(%lu) unnecessary: uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)client_egid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			;
 		} else if (  setegid(client_egid)  ) {
-			asl_log(asl, log_msg, ASL_LEVEL_ERR, "Before running tunnelblick-helper, setegid(%lu) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
+			asl_log(asl, log_msg, ASL_LEVEL_ERR, "Before running halonet-helper, setegid(%lu) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
 					(unsigned long)client_egid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 //		} else {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running tunnelblick-helper, setegid(%lu) succeeded: uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running halonet-helper, setegid(%lu) succeeded: uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)client_egid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 		}
 		if (  geteuid() == client_euid  ) {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running tunnelblick-helper, seteuid(%lu) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running halonet-helper, seteuid(%lu) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)client_euid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			;
 		} else if (  seteuid(client_euid)  ) {
-			asl_log(asl, log_msg, ASL_LEVEL_ERR, "Before running tunnelblick-helper, seteuid(%lu) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
+			asl_log(asl, log_msg, ASL_LEVEL_ERR, "Before running halonet-helper, seteuid(%lu) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
 					(unsigned long)client_euid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 //		} else {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running tunnelblick-helper, seteuid(%lu) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Before running halonet-helper, seteuid(%lu) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)client_euid, (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 		}
 		
-//		asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Launching tunnelblick-helper as uid 0, euid = %lu, gid = 0, and egid = %lu; user '%s' with home folder '%s'",
+//		asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "Launching halonet-helper as uid 0, euid = %lu, gid = 0, and egid = %lu; user '%s' with home folder '%s'",
 //				(unsigned long)client_euid, (unsigned long)client_egid, [userName UTF8String], [userHome UTF8String]);
 		
-		OSStatus status = runTool(userName, userHome, tunnelblickHelperPath, arguments, &stdoutString, &stderrString, asl, log_msg);
+		OSStatus status = runTool(userName, userHome, halonetHelperPath, arguments, &stdoutString, &stderrString, asl, log_msg);
 		
 		// Resume being root:wheel if needed
 		if (   geteuid() == 0  ) {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running tunnelblick-helper, seteuid(0) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running halonet-helper, seteuid(0) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			;
 		} else if (  seteuid(0)  ) {
-			asl_log(asl, log_msg, ASL_LEVEL_ERR, "After running tunnelblick-helper with command '%s', seteuid(0) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
+			asl_log(asl, log_msg, ASL_LEVEL_ERR, "After running halonet-helper with command '%s', seteuid(0) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
 					[commandToDisplay UTF8String], (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			retval = EXIT_FAILURE;
 			[pool drain];
 			goto done;
 		} else {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running tunnelblick-helper, seteuid(0) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running halonet-helper, seteuid(0) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			;
 		}
 		if (   getegid() == 0  ) {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running tunnelblick-helper, setegid(0) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running halonet-helper, setegid(0) unnecessary; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			;
 		} else if (  setegid(0)  ) {
-			asl_log(asl, log_msg, ASL_LEVEL_ERR, "After running tunnelblick-helper with command '%s', setegid(0) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
+			asl_log(asl, log_msg, ASL_LEVEL_ERR, "After running halonet-helper with command '%s', setegid(0) failed; uid = %lu; euid = %lu; gid = %lu; egid = %lu; error = %m",
 					[commandToDisplay UTF8String], (unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 			retval = EXIT_FAILURE;
 			[pool drain];
 			goto done;
 //		} else {
-//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running tunnelblick-helper, setegid(0) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
+//			asl_log(asl, log_msg, ASL_LEVEL_DEBUG, "After running halonet-helper, setegid(0) succeeded; uid = %lu; euid = %lu; gid = %lu; egid = %lu",
 //					(unsigned long)getuid(), (unsigned long)geteuid(), (unsigned long)getgid(), (unsigned long)getegid());
 		}
         
         if (  status != 0  ) {
             // Log the status from executing the command
-            asl_log(asl, log_msg, ASL_LEVEL_NOTICE, "Status = %ld from tunnelblick-helper command '%s'", (long) status, [commandToDisplay UTF8String]);
+            asl_log(asl, log_msg, ASL_LEVEL_NOTICE, "Status = %ld from halonet-helper command '%s'", (long) status, [commandToDisplay UTF8String]);
         }
 		
 		// Send the status, stdout, and stderr to the client as a UTF-8-encoded string which is terminated by a \0.

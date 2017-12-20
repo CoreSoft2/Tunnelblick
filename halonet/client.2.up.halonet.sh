@@ -2,12 +2,12 @@
 # - must be bash: uses bash-specific tricks
 #
 # ******************************************************************************************************************
-# Alternative up script for Tunnelblick
+# Alternative up script for Halonet
 #
 # Created by:
 #      Merging Ben Low's openvpn-tun-up-down.sh and openvpn-tap-up-down.sh scripts
 #      Splitting the result into separate up and down scripts
-#      Incorporating option processing from standard tunnelblick scripts
+#      Incorporating option processing from standard halonet scripts
 #
 # ******************************************************************************************************************
 #
@@ -62,7 +62,7 @@
 #                                     Modified as described above
 
 # ******************************************************************************************************************
-# BEGIN INSERTION FROM client.up.tunnelblick.sh:
+# BEGIN INSERTION FROM client.up.halonet.sh:
 # ******************************************************************************************************************
 
 trap "" TSTP
@@ -72,7 +72,7 @@ export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 
 # Process optional arguments (if any) for the script
 # Each one begins with a "-"
-# They come from Tunnelblick, and come first, before the OpenVPN arguments
+# They come from Halonet, and come first, before the OpenVPN arguments
 # So we set ARG_ script variables to their values and shift them out of the argument list
 # When we're done, only the OpenVPN arguments remain for the rest of the script to use
 ARG_MONITOR_NETWORK_CONFIGURATION="false"
@@ -94,7 +94,7 @@ while [ {$#} ] ; do
         ARG_TAP="true"
         shift
     else
-        if [  "${1:0:1}" = "-" ] ; then                     # Shift out Tunnelblick arguments (they start with "-") that we don't understand
+        if [  "${1:0:1}" = "-" ] ; then                     # Shift out Halonet arguments (they start with "-") that we don't understand
             shift                                           # so the rest of the script sees only the OpenVPN arguments                            
         else
             break
@@ -104,31 +104,31 @@ done
 
 TBCONFIG="$config"
 # Note: The script log path is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/Halonet/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/Halonet/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # Note: "/Users/..." works even if the home directory has a different path; it is used in the name of the script log file, and is not used as a path to get to anything.
-TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+TBALTPREFIX="/Library/Application Support/Halonet/Users/"
 TBALTPREFIXLEN="${#TBALTPREFIX}"
 TBCONFIGSTART="${TBCONFIG:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
     TBBASE="${TBCONFIG:$TBALTPREFIXLEN}"
     TBSUFFIX="${TBBASE#*/}"
     TBUSERNAME="${TBBASE%%/*}"
-    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Halonet/Configurations/$TBSUFFIX"
 fi
 
 CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+SCRIPT_LOG_FILE="/Library/Application Support/Halonet/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 trim() {
 	echo ${@}
 }
 
 # ******************************************************************************************************************
-# END INSERTION FROM client.up.tunnelblick.sh
+# END INSERTION FROM client.up.halonet.sh
 #
-# BEGIN code from openvpn-tun-up-down.sh and openvpn-tap-up-down.sh (first line modified to echo to Tunnelblick log file)
+# BEGIN code from openvpn-tun-up-down.sh and openvpn-tap-up-down.sh (first line modified to echo to Halonet log file)
 # ******************************************************************************************************************
 
 if [ -z "$dev" ]; then echo "$0: \$dev not defined, exiting" >> "${SCRIPT_LOG_FILE}"; exit 1; fi
@@ -191,7 +191,7 @@ else
      #   and the default resolver configuration ..." which is NOT what we want here.
 
      # "parse" foreign_options into separate DNS and DOMAIN records
-     # - based on Tunnelblick's client.up.osx.sh
+     # - based on Halonet's client.up.osx.sh
      # e.g. (could be any number, in any order; assume consecutive):
      #   foreign_option_1=dhcp-option DOMAIN example.net
      #   foreign_option_2=dhcp-option DNS 10.1.0.1

@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>Program</key>
-	<string>/Applications/Tunnelblick.app/Contents/Resources/tunnelblickd</string>
+	<string>/Applications/Halonet.app/Contents/Resources/halonetd</string>
 	<key>UserName</key>
 	<string>root</string>
 	<key>GroupName</key>
 	<string>wheel</string>
 	<key>Label</key>
-	<string>net.tunnelblick.tunnelblick.tunnelblickd</string>
+	<string>com.pivot.securiyt.halonetd</string>
 	<key>StandardErrorPath</key>
-	<string>/var/log/Tunnelblick/tunnelblickd.log</string>
+	<string>/var/log/Halonet/halonetd.log</string>
 	<key>Sockets</key>
 	<dict>
 		<key>Listener</key>
@@ -23,7 +23,7 @@
 			<key>SockPathMode</key>
 			<integer>438</integer>
 			<key>SockPathName</key>
-			<string>/var/run/net.tunnelblick.tunnelblick.tunnelblickd.socket</string>
+			<string>/var/run/com.pivot.security.halonetd.socket</string>
 		</dict>
 	</dict>
 </dict>

@@ -2,7 +2,7 @@
 # Note: must be bash; uses bash-specific tricks
 #
 # ******************************************************************************************************************
-# This Tunnelblick script does everything! It handles TUN and TAP interfaces, 
+# This Halonet script does everything! It handles TUN and TAP interfaces, 
 # pushed configurations and DHCP leases. :)
 # 
 # This is the "Down" version of the script, executed after the connection is 
@@ -32,7 +32,7 @@ echo ${@}
 # @param String list - list of network service names, output from disable_ipv6()
 restore_ipv6() {
 
-    # Undoes the actions performed by the disable_ipv6() routine in client.up.tunnelblick.sh by restoring the IPv6
+    # Undoes the actions performed by the disable_ipv6() routine in client.up.halonet.sh by restoring the IPv6
     # 'automatic' setting for each network service for which that routine disabled IPv6.
     #
     # $1 must contain the output from disable_ipv6() -- the list of network services.
@@ -137,7 +137,7 @@ flushDNSCache()
 
 resetPrimaryInterface()
 {
-	expected_path="/Library/Application Support/Tunnelblick/expect-disconnect.txt"
+	expected_path="/Library/Application Support/Halonet/expect-disconnect.txt"
 
 	if [ -e "$expected_path" ] ; then
 		rm -f "$expected_path"
@@ -205,23 +205,23 @@ logMessage "Start of output from ${OUR_NAME}"
 
 # Remove the flag file that indicates we need to run the down script
 
-if [ -e   "/tmp/tunnelblick-downscript-needs-to-be-run.txt" ] ; then
-    rm -f "/tmp/tunnelblick-downscript-needs-to-be-run.txt"
+if [ -e   "/tmp/halonet-downscript-needs-to-be-run.txt" ] ; then
+    rm -f "/tmp/halonet-downscript-needs-to-be-run.txt"
 fi
 
 # Test for the "-r" Tunnelbick option (Reset primary interface after disconnecting) because we _always_ need its value.
 # Usually we get the value for that option (and the other options) from State:/Network/OpenVPN,
 # but that key may not exist (because, for example, there were no DNS changes).
-# So we get the value from the Tunnelblick options passed to this script by OpenVPN.
+# So we get the value from the Halonet options passed to this script by OpenVPN.
 #
-# We do the same thing for the -f Tunnelblick option (Flush DNS cache after connecting or disconnecting)
+# We do the same thing for the -f Halonet option (Flush DNS cache after connecting or disconnecting)
 ARG_RESET_PRIMARY_INTERFACE_ON_DISCONNECT="false"
 ARG_RESET_PRIMARY_INTERFACE_ON_DISCONNECT_UNEXPECTED="false"
 ARG_FLUSH_DNS_CACHE="false"
 while [ {$#} ] ; do
 
-	if [ "${1:0:1}" != "-" ] ; then				# Tunnelblick arguments start with "-" and come first
-        break                                   # so if this one doesn't start with "-" we are done processing Tunnelblick arguments
+	if [ "${1:0:1}" != "-" ] ; then				# Halonet arguments start with "-" and come first
+        break                                   # so if this one doesn't start with "-" we are done processing Halonet arguments
     fi
 
 	if [ "$1" = "-r" ] ; then
@@ -242,7 +242,7 @@ readonly ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING ARG_DISABLE_INTERNET_AC
 # Quick check - is the configuration there?
 if ! scutil -w State:/Network/OpenVPN &>/dev/null -t 1 ; then
 	# Configuration isn't there
-    logMessage "WARNING: Not restoring DNS settings because no saved Tunnelblick DNS information was found."
+    logMessage "WARNING: Not restoring DNS settings because no saved Halonet DNS information was found."
 	
 	flushDNSCache
     
@@ -254,30 +254,30 @@ if ! scutil -w State:/Network/OpenVPN &>/dev/null -t 1 ; then
 fi
 
 # Get info saved by the up script
-TUNNELBLICK_CONFIG="$( scutil <<-EOF
+HALONET_CONFIG="$( scutil <<-EOF
 	open
 	show State:/Network/OpenVPN
 	quit
 EOF
 )"
 
-ARG_MONITOR_NETWORK_CONFIGURATION="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*MonitorNetwork :' | sed -e 's/^.*: //g')"
-LEASEWATCHER_PLIST_PATH="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*LeaseWatcherPlistPath :' | sed -e 's/^.*: //g')"
-REMOVE_LEASEWATCHER_PLIST="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RemoveLeaseWatcherPlist :' | sed -e 's/^.*: //g')"
-PSID="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*Service :' | sed -e 's/^.*: //g')"
-# Don't need: SCRIPT_LOG_FILE="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*ScriptLogFile :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_RESTORE_ON_DNS_RESET="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RestoreOnDNSReset :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_RESTORE_ON_WINS_RESET="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RestoreOnWINSReset :' | sed -e 's/^.*: //g')"
-# Don't need: PROCESS="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*PID :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_IGNORE_OPTION_FLAGS="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*IgnoreOptionFlags :' | sed -e 's/^.*: //g')"
-ARG_TAP="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*IsTapInterface :' | sed -e 's/^.*: //g')"
-bRouteGatewayIsDhcp="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RouteGatewayIsDhcp :' | sed -e 's/^.*: //g')"
-bTapDeviceHasBeenSetNone="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*TapDeviceHasBeenSetNone :' | sed -e 's/^.*: //g')"
-bAlsoUsingSetupKeys="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*bAlsoUsingSetupKeys :' | sed -e 's/^.*: //g')"
-sTunnelDevice="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*TunnelDevice :' | sed -e 's/^.*: //g')"
+ARG_MONITOR_NETWORK_CONFIGURATION="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*MonitorNetwork :' | sed -e 's/^.*: //g')"
+LEASEWATCHER_PLIST_PATH="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*LeaseWatcherPlistPath :' | sed -e 's/^.*: //g')"
+REMOVE_LEASEWATCHER_PLIST="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RemoveLeaseWatcherPlist :' | sed -e 's/^.*: //g')"
+PSID="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*Service :' | sed -e 's/^.*: //g')"
+# Don't need: SCRIPT_LOG_FILE="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*ScriptLogFile :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_RESTORE_ON_DNS_RESET="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RestoreOnDNSReset :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_RESTORE_ON_WINS_RESET="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RestoreOnWINSReset :' | sed -e 's/^.*: //g')"
+# Don't need: PROCESS="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*PID :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_IGNORE_OPTION_FLAGS="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*IgnoreOptionFlags :' | sed -e 's/^.*: //g')"
+ARG_TAP="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*IsTapInterface :' | sed -e 's/^.*: //g')"
+bRouteGatewayIsDhcp="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RouteGatewayIsDhcp :' | sed -e 's/^.*: //g')"
+bTapDeviceHasBeenSetNone="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*TapDeviceHasBeenSetNone :' | sed -e 's/^.*: //g')"
+bAlsoUsingSetupKeys="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*bAlsoUsingSetupKeys :' | sed -e 's/^.*: //g')"
+sTunnelDevice="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*TunnelDevice :' | sed -e 's/^.*: //g')"
 
 # Note: '\n' was translated into '\t', so we translate it back (it was done because grep and sed only work with single lines)
-sRestoreIpv6Services="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RestoreIpv6Services :' | sed -e 's/^.*: //g' | tr '\t' '\n')"
+sRestoreIpv6Services="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RestoreIpv6Services :' | sed -e 's/^.*: //g' | tr '\t' '\n')"
 
 # Remove leasewatcher
 if ${ARG_MONITOR_NETWORK_CONFIGURATION} ; then
@@ -292,8 +292,8 @@ if ${ARG_TAP} ; then
 	if [ "$bRouteGatewayIsDhcp" == "true" ]; then
         if [ "$bTapDeviceHasBeenSetNone" == "false" ]; then
             if [ -z "$dev" ]; then
-                # If $dev is not defined, then use TunnelDevice, which was set from $dev by client.up.tunnelblick.sh
-                # ($def is not defined when this script is called from MenuController to clean up when exiting Tunnelblick)
+                # If $dev is not defined, then use TunnelDevice, which was set from $dev by client.up.halonet.sh
+                # ($def is not defined when this script is called from MenuController to clean up when exiting Halonet)
                 if [ -n "${sTunnelDevice}" ]; then
                     logMessage "WARNING: \$dev not defined; using TunnelDevice: ${sTunnelDevice}"
                     set +e
@@ -347,7 +347,7 @@ DNS_OLD_SETUP="$( scutil <<-EOF
 EOF
 )"
 TB_NO_SUCH_KEY="<dictionary> {
-  TunnelblickNoSuchKey : true
+  HalonetNoSuchKey : true
 }"
 
 if [ "${DNS_OLD}" = "${TB_NO_SUCH_KEY}" ] ; then

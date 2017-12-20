@@ -3,13 +3,13 @@
  * Contributions by Dirk Theisen
  * Contributions by Jonathan K. Bullard Copyright 2010, 2011, 2012, 2013, 2014, 2015, 2017. All rights reserved.
  *
- *  This file is part of Tunnelblick.
+ *  This file is part of Halonet.
  *
- *  Tunnelblick is free software: you can redistribute it and/or modify
+ *  Halonet is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2
  *  as published by the Free Software Foundation.
  *
- *  Tunnelblick is distributed in the hope that it will be useful,
+ *  Halonet is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
@@ -42,12 +42,12 @@
 NSAutoreleasePool   * pool           = nil;
 
 NSString			* gConfigPath    = nil;     // Path to configuration file
-//                                                 in ~/Library/Application Support/Tunnelblick/Configurations/
-//                                                 or /Library/Application Support/Tunnelblick/Users/<username>/
-//                                                 or /Library/Application Support/Tunnelblick/Shared
+//                                                 in ~/Library/Application Support/Halonet/Configurations/
+//                                                 or /Library/Application Support/Halonet/Users/<username>/
+//                                                 or /Library/Application Support/Halonet/Shared
 //                                                 or /Applications/XXXXX.app/Contents/Resources/Deploy
-NSString			* gResourcesPath = nil;     // Path to Tunnelblick.app/Contents/Resources
-NSString            * gDeployPath    = nil;     // Path to Tunnelblick.app/Contents/Resources/Deploy
+NSString			* gResourcesPath = nil;     // Path to Halonet.app/Contents/Resources
+NSString            * gDeployPath    = nil;     // Path to Halonet.app/Contents/Resources/Deploy
 NSString            * gStartArgs     = nil;     // String with an underscore-delimited list of the following arguments to openvpnstart's start
 //                                              // subcommand: useScripts, skipScrSec, cfgLocCode, noMonitor, and bitMask
 
@@ -104,13 +104,13 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "               always returns success\n\n"
             
 			"./openvpnstart re-enable-network-services\n"
-			"               to run Tunnelblick's re-enable-network-services.sh script\n\n"
+			"               to run Halonet's re-enable-network-services.sh script\n\n"
 			
             "./openvpnstart route-pre-down\n"
-            "               to run Tunnelblick's client.route-pre-down.tunnelblick script\n\n"
+            "               to run Halonet's client.route-pre-down.halonet script\n\n"
             
 			"./openvpnstart route-pre-down-k\n"
-			"               to run Tunnelblick's client.route-pre-down.tunnelblick script with the '-k' option\n\n"
+			"               to run Halonet's client.route-pre-down.halonet script with the '-k' option\n\n"
 			
             "./openvpnstart checkSignature\n"
             "               to verify the application's signature using codesign\n\n"
@@ -119,7 +119,7 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "               to delete all log files that have the OPENVPNSTART_NOT_WHEN_COMPUTER_STARTS bit set in the bitmask encoded in their filenames.\n\n"
             
 			"./openvpnstart expectDisconnect flag\n"
-			"               creates (flag = 1) or removes (flag = 0) the file /Library/Application Support/Tunnelblick/expect-disconnect.txt\n\n"
+			"               creates (flag = 1) or removes (flag = 0) the file /Library/Application Support/Halonet/expect-disconnect.txt\n\n"
 			
             "./openvpnstart loadKexts     [bitMask]\n"
             "               to load .tun and .tap kexts\n\n"
@@ -128,10 +128,10 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "               to unload the .tun and .tap kexts\n\n"
             
             "./openvpnstart secureUpdate name\n"
-            "               to secure the specified update folder in /Library/Application Support/Tunnelblick/Tblks.\n\n"
+            "               to secure the specified update folder in /Library/Application Support/Halonet/Tblks.\n\n"
             
             "./openvpnstart down scriptNumber\n"
-            "               to run Tunnelblick's scriptNumber down script\n\n"
+            "               to run Halonet's scriptNumber down script\n\n"
             
             "./openvpnstart compareShadowCopy      displayName\n"
             "               to compare a private .ovpn, .conf, or .tblk with its secure (shadow) copy\n\n"
@@ -161,12 +161,12 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "               to run the reconnecting.sh script inside a .tblk.\n\n"
             
             "./openvpnstart start  configName  mgtPort  [useScripts  [skipScrSec  [cfgLocCode  [noMonitor  [bitMask  [leasewatchOptions [openvpnVersion] ]]  ]  ]  ]  ]\n\n"
-            "               to load the net.tunnelblick.tun and/or net.tunnelblick.tap kexts and start OpenVPN with the specified configuration file and options.\n"
-            "               foo.tun kext will be unloaded before loading net.tunnelblick.tun, and foo.tap will be unloaded before loading net.tunnelblick.tap.\n\n"
+            "               to load the net.halonet.tun and/or net.halonet.tap kexts and start OpenVPN with the specified configuration file and options.\n"
+            "               foo.tun kext will be unloaded before loading net.halonet.tun, and foo.tap will be unloaded before loading net.halonet.tap.\n\n"
             
             "Where:\n\n"
             
-            "scriptNumber is an integer designating what down script to run. (0 = client.down.tunnelblick.sh; 1 = client.1.down.tunnelblick.sh, etc.\n\n"
+            "scriptNumber is an integer designating what down script to run. (0 = client.down.halonet.sh; 1 = client.1.down.halonet.sh, etc.\n\n"
             
             "processId  is the process ID of the openvpn process to kill\n\n"
             
@@ -179,37 +179,37 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "useScripts has four fields (weird, but backward compatible):\n"
             "           bit 0 is 0 to not run scripts when the tunnel goes up or down (scripts may still be used in the configuration file)\n"
             "                 or 1 to run scripts before connecting and after disconnecting (scripts in the configuration file will be ignored)\n"
-            "                (The standard scripts are Tunnelblick.app/Contents/Resources/client.up.tunnelblick.sh & client.down.tunnelblick.sh,\n"
-            "                 and client.route-pre-down.tunnelblick.sh if bits 2-7 are zero, but see the cfgLocCode option)\n"
+            "                (The standard scripts are Halonet.app/Contents/Resources/client.up.halonet.sh & client.down.halonet.sh,\n"
+            "                 and client.route-pre-down.halonet.sh if bits 2-7 are zero, but see the cfgLocCode option)\n"
             "           bit 1 is 0 to not use the 'openvpn-down-root.so' plugin\n"
             "                 or 1 to use the 'openvpn-down-root.so' plugin\n"
             "           bits 2-7 specify the script to use. If non-zero, they are converted to a digit, N, used as an added extension to the script file\n"
             "                    name, just before 'nomonitor' if it appears, otherwise just before '.up' or '.down'.\n\n"
             "           bits 8-11 specify the OpenVPN --verb level to set. If bits 8...11 == 12 (0x0C), the verb level is not set\n"
             "                     Note: bits 8-11 are ignored and the --verb level is set to 0 if logging is disabled in bitMask.\n\n"
-            "           Examples: useScripts=1 means use client.up.tunnelblick.sh, client.down.tunnelblick.sh, and client.route-pre-down.tunnelblick.sh\n"
+            "           Examples: useScripts=1 means use client.up.halonet.sh, client.down.halonet.sh, and client.route-pre-down.halonet.sh\n"
             "                     useScripts=3 means use client.up.osx.sh, client.down.osx.sh, and the 'openvpn-down-root.so' plugin "
             "                     useScripts=5 means use client.1.up.osx.sh and client.1.down.osx.sh\n"
             "                     useScripts=9 means use client.2.up.osx.sh and client.2.down.osx.sh\n"
             
             "skipScrSec is 1 to skip sending a '--script-security 2' argument to OpenVPN (versions before 2.1_rc9 don't implement it).\n\n"
             
-            "cfgLocCode is 0 to use the standard folder (~/Library/Application Support/Tunnelblick/Configurations) for configuration and other files,\n"
+            "cfgLocCode is 0 to use the standard folder (~/Library/Application Support/Halonet/Configurations) for configuration and other files,\n"
             "              0 is no longer an accepted value. Private configurations may not be used by openvpnstart\n"
-            "           or 1 to use the alternate folder (/Library/Application Support/Tunnelblick/Users/<username>)\n"
+            "           or 1 to use the alternate folder (/Library/Application Support/Halonet/Users/<username>)\n"
             "                for configuration files and the standard folder for other files,\n"
-            "           or 2 to use the Deploy folder in Tunnelblick.app/Contents/Resources for configuration and other files,\n"
+            "           or 2 to use the Deploy folder in Halonet.app/Contents/Resources for configuration and other files,\n"
             "                and If 'useScripts' is not 0\n"
             "                    Then If .../Deploy/<configName>.up.sh   exists,           it is used instead of .../Resources/client.up.osx.sh,\n"
             "                     and If .../Deploy/<configName>.down.sh exists,           it is used instead of .../Resources/client.down.osx.sh\n"
-            "                     and If .../Deploy/<configName>.route-pre-down.sh exists, it is used instead of .../Resources/client.route-pre-down.tunnelblick.sh\n"
-            "           or 3 to use /Library/Application Support/Tunnelblick/Shared\n\n"
+            "                     and If .../Deploy/<configName>.route-pre-down.sh exists, it is used instead of .../Resources/client.route-pre-down.halonet.sh\n"
+            "           or 3 to use /Library/Application Support/Halonet/Shared\n\n"
             
             "noMonitor  is 0 to monitor the connection for interface configuration changes\n"
             "           or 1 to not monitor the connection for interface configuration changes\n\n"
             
-            "bitMask    contains a mask: bit  0 is 1 to unload/load net.tunnelblick.tun (bit 0 is the lowest ordered bit)\n"
-            "                            bit  1 is 1 to unload/load net.tunnelblick.tap\n"
+            "bitMask    contains a mask: bit  0 is 1 to unload/load net.halonet.tun (bit 0 is the lowest ordered bit)\n"
+            "                            bit  1 is 1 to unload/load net.halonet.tap\n"
             "                            bit  2 is 1 to unload foo.tun\n"
             "                            bit  3 is 1 to unload foo.tap\n"
             "                            bit  4 is 1 to restore settings on a reset of DNS  to pre-VPN settings (restarts connection otherwise)\n"
@@ -261,7 +261,7 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "                     G - Workgroup changed to some other value\n"
             "                     W - WINSAddresses changed to some other value\n\n"
             
-            "openvpnVersion is a string with the name of the subfolder of /Applications/Tunnelblick.app/Contents/Resources/openvpn\n"
+            "openvpnVersion is a string with the name of the subfolder of /Applications/Halonet.app/Contents/Resources/openvpn\n"
             "               that contains the openvpn and openvpn-down-root.so binaries to be used for the connection. The string may\n"
             "               contain only lower-case letters, hyphen, underscore, period, and the digits 0-9.\n"
             "               If not present, the lowest (in lexicographical order) subfolder of openvpn will be used.\n"
@@ -275,13 +275,13 @@ void printUsageMessageAndExitOpenvpnstart(void) {
             "The normal return code is 0. If an error occurs a message is sent to stderr and a non-zero value is returned.\n\n"
             
             "This executable, openvpn, tap.kext, and tun.kext (and client.up.osx.sh and client.down.osx.sh if they are used)\n"
-            "must all be located in /Library/Application Support/Tunnelblick/bin/.\n\n"
+            "must all be located in /Library/Application Support/Halonet/bin/.\n\n"
             
-            "Tunnelblick must have been run and an administrator password entered at least once before openvpnstart can be used.\n\n"
+            "Halonet must have been run and an administrator password entered at least once before openvpnstart can be used.\n\n"
             
-            "For more information on using Deploy, see the Deployment wiki at https://tunnelblick.net/cCusDeployed.html\n"
+            "For more information on using Deploy, see the Deployment wiki at https://halonet.net/cCusDeployed.html\n"
             , killStringC, killAllStringC);
-    exitOpenvpnstart(OPENVPNSTART_RETURN_SYNTAX_ERROR);      // This exit code is used in the VPNConnection connect: method to inhibit display of this long syntax error message because it means there is an internal Tunnelblick error
+    exitOpenvpnstart(OPENVPNSTART_RETURN_SYNTAX_ERROR);      // This exit code is used in the VPNConnection connect: method to inhibit display of this long syntax error message because it means there is an internal Halonet error
 }
 
 void becomeRoot(NSString * reason) {
@@ -741,7 +741,7 @@ void exitIfOvpnNeedsRepair(void) {
 void exitIfPathShouldNotBeRunAsRoot(NSString * path) {
     
     // We allow only certain programs to be run as root. These are:
-    //    * Scripts and copies of OpenVPN built into Tunnelblick
+    //    * Scripts and copies of OpenVPN built into Halonet
     //    * Certain system programs such as kextload and dsacacheutil
     //    * User-supplied scripts inside a .tblk that is located in a shared, deployed, or shandow configuration folder
     //
@@ -758,7 +758,7 @@ void exitIfPathShouldNotBeRunAsRoot(NSString * path) {
             NSArray  * pathComponents = [path pathComponents];
             if (   (   [[pathComponents objectAtIndex: 0] isEqualToString: @"/"]
                     && [[pathComponents objectAtIndex: 1] isEqualToString: @"Applications"]
-                    && [[pathComponents objectAtIndex: 2] isEqualToString: @"Tunnelblick.app"]
+                    && [[pathComponents objectAtIndex: 2] isEqualToString: @"Halonet.app"]
                     && [[pathComponents objectAtIndex: 3] isEqualToString: @"Contents"]
                     && [[pathComponents objectAtIndex: 4] isEqualToString: @"Resources"]
                     && (   (   ([pathComponents count] == 8)
@@ -767,11 +767,11 @@ void exitIfPathShouldNotBeRunAsRoot(NSString * path) {
                             && [[pathComponents objectAtIndex: 7] isEqualToString: @"openvpn"]
                             )
                         || (   ([pathComponents count] == 6)
-                            && (   [[pathComponents objectAtIndex: 5] isEqualToString: @"client.down.tunnelblick.sh"]
-                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.1.down.tunnelblick.sh"]
-                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.2.down.tunnelblick.sh"]
-                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.3.down.tunnelblick.sh"]
-                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.route-pre-down.tunnelblick.sh"]
+                            && (   [[pathComponents objectAtIndex: 5] isEqualToString: @"client.down.halonet.sh"]
+                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.1.down.halonet.sh"]
+                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.2.down.halonet.sh"]
+                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.3.down.halonet.sh"]
+                                || [[pathComponents objectAtIndex: 5] isEqualToString: @"client.route-pre-down.halonet.sh"]
                                 || [[pathComponents objectAtIndex: 5] isEqualToString: @"re-enable-network-services.sh"]
                                 )
                             )
@@ -831,11 +831,11 @@ void exitIfPathShouldNotBeRunAsRoot(NSString * path) {
 }
 
 //**************************************************************************************************************************
-NSString * newTemporaryDirectoryPathInTunnelblickHelper(void) {
+NSString * newTemporaryDirectoryPathInHalonetHelper(void) {
     // Code for creating a temporary directory from http://cocoawithlove.com/2009/07/temporary-files-and-folders-in-cocoa.html
     // Modified to check for malloc returning NULL, use strlcpy, use [NSFileManager defaultManager], and use more readable length for stringWithFileSystemRepresentation
     
-    NSString   * tempDirectoryTemplate = [NSTemporaryDirectory() stringByAppendingPathComponent: @"TunnelblickTemporaryDotTblk-XXXXXX"];
+    NSString   * tempDirectoryTemplate = [NSTemporaryDirectory() stringByAppendingPathComponent: @"HalonetTemporaryDotTblk-XXXXXX"];
     const char * tempDirectoryTemplateCString = fileSystemRepresentation(tempDirectoryTemplate);
     
     size_t bufferLength = strlen(tempDirectoryTemplateCString) + 1;
@@ -877,7 +877,7 @@ int runAsRoot(NSString * thePath, NSArray * theArguments, mode_t permissions) {
 	[task setArguments:theArguments];
 	
     // Send stdout and stderr to temporary files, and read the files after the task completes
-    NSString * dirPath = newTemporaryDirectoryPathInTunnelblickHelper();
+    NSString * dirPath = newTemporaryDirectoryPathInHalonetHelper();
     if (  ! dirPath  ) {
         fprintf(stderr, "runAsRoot: Failed to create temporary directory");
         return -1;
@@ -992,7 +992,7 @@ int runScript(NSString * scriptName, int argc, char * argv[]) {
 	validateCfgLocCode(cfgLocCode);
     
     if (  ! [configName hasSuffix: @".tblk"]  ) {
-        fprintf(stderr, "Only a Tunnelblick VPN Configurations may run the %s script\n", [scriptName UTF8String]);
+        fprintf(stderr, "Only a Halonet VPN Configurations may run the %s script\n", [scriptName UTF8String]);
         exitOpenvpnstart(211);
     }
     
@@ -1059,8 +1059,8 @@ int runDownScript(unsigned scriptNumber) {
     
     NSString * scriptPath = [gResourcesPath stringByAppendingPathComponent:
                              (   scriptNumber == 0
-                              ?  @"client.down.tunnelblick.sh"
-                              : [NSString stringWithFormat: @"client.%d.down.tunnelblick.sh", scriptNumber])];
+                              ?  @"client.down.halonet.sh"
+                              : [NSString stringWithFormat: @"client.%d.down.halonet.sh", scriptNumber])];
 	
 	becomeRootToAccessPath(scriptPath, @"Check if script exists");
 	BOOL scriptExists = [[NSFileManager defaultManager] fileExistsAtPath: scriptPath];
@@ -1120,7 +1120,7 @@ int runRoutePreDownScript(BOOL kOption) {
 	
     int returnValue = 0;
     
-    NSString * scriptPath = [gResourcesPath stringByAppendingPathComponent: @"client.route-pre-down.tunnelblick.sh"];
+    NSString * scriptPath = [gResourcesPath stringByAppendingPathComponent: @"client.route-pre-down.halonet.sh"];
 	
 	becomeRootToAccessPath(scriptPath, @"Check if script exists");
 	BOOL scriptExists = [[NSFileManager defaultManager] fileExistsAtPath: scriptPath];
@@ -1233,7 +1233,7 @@ NSString * openvpnToUsePath (NSString * openvpnFolderPath, NSString * openvpnVer
 						   : lowestDirSoFar);
     
     if (  noSuchVersion  ) {
-        fprintf(stderr, "OpenVPN version '%s' is not included in this copy of Tunnelblick, using version %s.\n",
+        fprintf(stderr, "OpenVPN version '%s' is not included in this copy of Halonet, using version %s.\n",
                 [openvpnVersion UTF8String],
                 [[lowestDirSoFar substringFromIndex: [@"openvpn-" length]] UTF8String]);
     }
@@ -1437,7 +1437,7 @@ NSString * constructLogBase(NSString * configurationFile, unsigned cfgLocCode) {
     // So scripts can construct the name of the log file, and from that, the path to the log file, using only the username.
     //
     // For shadow copies or private configurations, the path is constructed from a "standardized" path to the private config file:
-    //      /Users/_USERNAME_/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+    //      /Users/_USERNAME_/Library/Application Support/Halonet/Configurations/Folder/Subfolder/config.ovpn
     //
     // If the configuration file is a .tblk, the path to the actual configuration file inside it is used.
 	
@@ -1450,7 +1450,7 @@ NSString * constructLogBase(NSString * configurationFile, unsigned cfgLocCode) {
 				exitOpenvpnstart(194);
 			}
 			// THIS IS NOT USED AS A PATHNAME. SEE NOTE ABOVE.
-            configPrefix = [NSString stringWithFormat: @"/Users/%@/Library/Application Support/Tunnelblick/Configurations", gUserName];
+            configPrefix = [NSString stringWithFormat: @"/Users/%@/Library/Application Support/Halonet/Configurations", gUserName];
             break;
         case CFG_LOC_DEPLOY:
             configPrefix = [[gDeployPath copy] autorelease];
@@ -1534,7 +1534,7 @@ NSString * createScriptLog(NSString* configurationFile, unsigned cfgLocCode) {
     NSDictionary * logAttributes = [NSDictionary dictionaryWithObject: [NSNumber numberWithUnsignedLong: 0666] forKey: NSFilePosixPermissions];
 
     NSCalendarDate * date = [NSCalendarDate date];
-    NSString * dateCmdLine = [NSString stringWithFormat:@"%@ *Tunnelblick: openvpnstart starting OpenVPN\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"]];
+    NSString * dateCmdLine = [NSString stringWithFormat:@"%@ *Halonet: openvpnstart starting OpenVPN\n",[date descriptionWithCalendarFormat:@"%a %b %e %H:%M:%S %Y"]];
     const char * bytes = [dateCmdLine UTF8String];
     NSData * dateCmdLineAsData = [NSData dataWithBytes: bytes length: strlen(bytes)];
     
@@ -1670,7 +1670,7 @@ void compareShadowCopy (NSString * fileName) {
 		exitOpenvpnstart(193);
 	}
 	
-    NSString * privatePrefix = [gUserHome stringByAppendingPathComponent:@"/Library/Application Support/Tunnelblick/Configurations"];
+    NSString * privatePrefix = [gUserHome stringByAppendingPathComponent:@"/Library/Application Support/Halonet/Configurations"];
     NSString * shadowPrefix  = [L_AS_T_USERS stringByAppendingPathComponent: gUserName];
     
     NSString * privatePath = [[privatePrefix stringByAppendingPathComponent: fileName] stringByAppendingPathExtension: @"tblk"];
@@ -1705,7 +1705,7 @@ void revertToShadow (NSString * fileName) {
 		exitOpenvpnstart(188);
 	}
 	
-    NSString * privatePrefix = [gUserHome     stringByAppendingPathComponent: @"Library/Application Support/Tunnelblick/Configurations"];
+    NSString * privatePrefix = [gUserHome     stringByAppendingPathComponent: @"Library/Application Support/Halonet/Configurations"];
 	NSString * privatePath   = [privatePrefix stringByAppendingPathComponent: fileName];
 	
     NSString * shadowPrefix  = [L_AS_T_USERS stringByAppendingPathComponent: gUserName];
@@ -1758,7 +1758,7 @@ void printSanitizedConfigurationFile(NSString * configFile, unsigned cfgLocCode)
 			
             configPrefix = [[[[gUserHome stringByAppendingPathComponent: @"Library"]
                               stringByAppendingPathComponent: @"Application Support"]
-                             stringByAppendingPathComponent: @"Tunnelblick"]
+                             stringByAppendingPathComponent: @"Halonet"]
                             stringByAppendingPathComponent: @"Configurations"];
             break;
         case CFG_LOC_DEPLOY:
@@ -1851,7 +1851,7 @@ void loadKexts(unsigned int bitMask) {
         sleep(1);
     }
     if (  status != 0  ) {
-        fprintf(stderr, "Unable to load net.tunnelblick.tun and/or net.tunnelblick.tap kexts in 5 tries. Status = %d\n", status);
+        fprintf(stderr, "Unable to load net.halonet.tun and/or net.halonet.tap kexts in 5 tries. Status = %d\n", status);
         exitOpenvpnstart(OPENVPNSTART_COULD_NOT_LOAD_KEXT);
     }
 }
@@ -1869,10 +1869,10 @@ void unloadKexts(unsigned int bitMask) {
     [arguments addObject: @"-q"];
     
     if (  (bitMask & OPENVPNSTART_OUR_TAP_KEXT) != 0  ) {
-        [arguments addObjectsFromArray: [NSArray arrayWithObjects: @"-b", @"net.tunnelblick.tap", nil]];
+        [arguments addObjectsFromArray: [NSArray arrayWithObjects: @"-b", @"net.halonet.tap", nil]];
     }
     if (  (bitMask & OPENVPNSTART_OUR_TUN_KEXT) != 0  ) {
-        [arguments addObjectsFromArray: [NSArray arrayWithObjects: @"-b", @"net.tunnelblick.tun", nil]];
+        [arguments addObjectsFromArray: [NSArray arrayWithObjects: @"-b", @"net.halonet.tun", nil]];
     }
     if (  (bitMask & OPENVPNSTART_FOO_TAP_KEXT) != 0  ) {
         [arguments addObjectsFromArray: [NSArray arrayWithObjects: @"-b", @"foo.tap", nil]];
@@ -1974,7 +1974,7 @@ void safeUpdate(NSString * displayName, BOOL doUpdate) {
         exit(OPENVPNSTART_UPDATE_SAFE_NOT_OK);
     }
     
-    NSString * sourcePrefix = [gUserHome     stringByAppendingPathComponent: @"Library/Application Support/Tunnelblick/Configurations"];
+    NSString * sourcePrefix = [gUserHome     stringByAppendingPathComponent: @"Library/Application Support/Halonet/Configurations"];
     NSString * sourcePath   = [[sourcePrefix stringByAppendingPathComponent: displayName] stringByAppendingPathExtension: @"tblk"];
     
     NSString * targetPrefix  = [L_AS_T_USERS stringByAppendingPathComponent: gUserName];
@@ -2064,9 +2064,9 @@ int startVPN(NSString * configFile,
     NSString * upscriptNoMonitorPath	 = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@nomonitor.up.osx.sh",           scriptNumString]];
     NSString * downscriptNoMonitorPath	 = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@nomonitor.down.osx.sh",         scriptNumString]];
     
-    NSString * newUpscriptPath           = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@up.tunnelblick.sh",             scriptNumString]];
-    NSString * newDownscriptPath         = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@down.tunnelblick.sh",           scriptNumString]];
-    NSString * newRoutePreDownscriptPath = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@route-pre-down.tunnelblick.sh", scriptNumString]];
+    NSString * newUpscriptPath           = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@up.halonet.sh",             scriptNumString]];
+    NSString * newDownscriptPath         = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@down.halonet.sh",           scriptNumString]];
+    NSString * newRoutePreDownscriptPath = [gResourcesPath stringByAppendingPathComponent: [NSString stringWithFormat: @"client.%@route-pre-down.halonet.sh", scriptNumString]];
     NSString * standardRoutePreDownscriptPath = [[newRoutePreDownscriptPath copy] autorelease];
     
     NSString * tblkPath = nil;  // Path to .tblk, or nil if configuration is .conf or .ovpn.
@@ -2102,7 +2102,7 @@ int startVPN(NSString * configFile,
             
         case CFG_LOC_SHARED:
             if (  ! [[configFile pathExtension] isEqualToString: @"tblk"]) {
-                fprintf(stderr, "Only Tunnelblick VPN Configurations (.tblk packages) may connect from /Library/Application Support/Tunnelblick/Shared\n");
+                fprintf(stderr, "Only Halonet VPN Configurations (.tblk packages) may connect from /Library/Application Support/Halonet/Shared\n");
                 exitOpenvpnstart(228);
             }
             cdFolderPath = L_AS_T_SHARED; // Will be set below BECAUSE this is a .tblk.
@@ -2156,7 +2156,7 @@ int startVPN(NSString * configFile,
     if (  (bitMask & OPENVPNSTART_DISABLE_LOGGING) == 0  ) {
         logPath = createOpenVPNLog(configFile, cfgLocCode, port);
         unsigned verbLevel = (  (useScripts & OPENVPNSTART_VERB_LEVEL_SCRIPT_MASK) >> OPENVPNSTART_VERB_LEVEL_SHIFT_COUNT  );
-        if (  verbLevel == TUNNELBLICK_CONFIG_LOGGING_LEVEL  ) {
+        if (  verbLevel == Halonet_CONFIG_LOGGING_LEVEL  ) {
             verbString = nil;
         } else {
             verbString = [NSString stringWithFormat: @"%u", verbLevel];
@@ -2176,7 +2176,7 @@ int startVPN(NSString * configFile,
     
 	// Set IV_GUI_VER using the "--setenv" option
 	// We get the Info.plist contents as follows because NSBundle's objectForInfoDictionaryKey: method returns the object as it was at
-	// compile time, before the TBBUILDNUMBER is replaced by the actual build number (which is done in the final run-script that builds Tunnelblick)
+	// compile time, before the TBBUILDNUMBER is replaced by the actual build number (which is done in the final run-script that builds Halonet)
 	// By constructing the path, we force the objects to be loaded with their values at run time.
 	NSString * plistPath    = [[[[NSBundle mainBundle] bundlePath]
 								stringByDeletingLastPathComponent] // Remove /Resources
@@ -2235,7 +2235,7 @@ int startVPN(NSString * configFile,
     }
     
     // Figure out which scripts to use (if any)
-    // For backward compatibility, we only use the "new" (-tunnelblick-argument-capable) scripts if there are no old scripts
+    // For backward compatibility, we only use the "new" (-halonet-argument-capable) scripts if there are no old scripts
     // This would normally be the case, but if someone's custom build inserts replacements for the old scripts, we will use the replacements instead of the new scripts
     
     if(  (useScripts & OPENVPNSTART_USE_SCRIPTS_RUN_SCRIPTS) != 0  ) {  // 'Set nameserver' specified, so use our standard scripts or Deploy/<config>.up.sh and Deploy/<config>.down.sh
@@ -2245,9 +2245,9 @@ int startVPN(NSString * configFile,
             NSString * deployDownscriptPath             = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@down.sh",                       scriptNumString]];
             NSString * deployUpscriptNoMonitorPath      = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@nomonitor.up.sh",               scriptNumString]];
             NSString * deployDownscriptNoMonitorPath    = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@nomonitor.down.sh",             scriptNumString]];
-            NSString * deployNewUpscriptPath            = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@up.tunnelblick.sh",             scriptNumString]];
-            NSString * deployNewDownscriptPath          = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@down.tunnelblick.sh",           scriptNumString]];
-            NSString * deployNewRoutePreDownscriptPath  = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@route-pre-down.tunnelblick.sh", scriptNumString]];
+            NSString * deployNewUpscriptPath            = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@up.halonet.sh",             scriptNumString]];
+            NSString * deployNewDownscriptPath          = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@down.halonet.sh",           scriptNumString]];
+            NSString * deployNewRoutePreDownscriptPath  = [deployScriptPath stringByAppendingPathExtension: [NSString stringWithFormat: @"%@route-pre-down.halonet.sh", scriptNumString]];
             
             if (  noMonitor  ) {
                 if (  [[NSFileManager defaultManager] fileExistsAtPath: deployUpscriptNoMonitorPath]  ) {
@@ -2331,9 +2331,9 @@ int startVPN(NSString * configFile,
             NSString * tblkDownscriptPath            = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@down.sh",                       scriptNumString]];
             NSString * tblkUpscriptNoMonitorPath     = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@nomonitor.up.sh",               scriptNumString]];
             NSString * tblkDownscriptNoMonitorPath   = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@nomonitor.down.sh",             scriptNumString]];
-            NSString * tblkNewUpscriptPath           = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@up.tunnelblick.sh",             scriptNumString]];
-            NSString * tblkNewDownscriptPath         = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@down.tunnelblick.sh",           scriptNumString]];
-            NSString * tblkNewRoutePreDownscriptPath = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@route-pre-down.tunnelblick.sh", scriptNumString]];
+            NSString * tblkNewUpscriptPath           = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@up.halonet.sh",             scriptNumString]];
+            NSString * tblkNewDownscriptPath         = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@down.halonet.sh",           scriptNumString]];
+            NSString * tblkNewRoutePreDownscriptPath = [cdFolderPath stringByAppendingPathComponent: [NSString stringWithFormat: @"%@route-pre-down.halonet.sh", scriptNumString]];
             
             if (  noMonitor  ) {
                 if (  fileExistsForRootAtPath(tblkUpscriptNoMonitorPath)  ) {
@@ -2447,13 +2447,13 @@ int startVPN(NSString * configFile,
         if (   scriptOptions
             && ( [scriptOptions length] != 0 )  ) {
             
-            if (  [upscriptPath hasSuffix: @"tunnelblick.sh"]  ) {
+            if (  [upscriptPath hasSuffix: @"halonet.sh"]  ) {
                 upscriptCommand   = [upscriptCommand   stringByAppendingString: scriptOptions];
             } else {
                 fprintf(stderr, "Warning: up script %s is not new version; not using '%s' options\n", [upscriptPath UTF8String], [scriptOptions UTF8String]);
             }
             
-            if (  [downscriptPath hasSuffix: @"tunnelblick.sh"]  ) {
+            if (  [downscriptPath hasSuffix: @"halonet.sh"]  ) {
                 downscriptCommand = [downscriptCommand stringByAppendingString: scriptOptions];
             } else {
                 fprintf(stderr, "Warning: down script %s is not new version; not using '%s' options\n", [downscriptPath UTF8String], [scriptOptions UTF8String]);
@@ -2464,7 +2464,7 @@ int startVPN(NSString * configFile,
         
         if (   ([upscriptCommand length] > 199  )
             || ([downscriptCommand length] > 199  )) {
-            fprintf(stderr, "Warning: Path for up and/or down script is very long. OpenVPN truncates the command line that starts each script to 255 characters, which may cause problems. Examine the OpenVPN log in Tunnelblick's \"VPN Details...\" window carefully.\n");
+            fprintf(stderr, "Warning: Path for up and/or down script is very long. OpenVPN truncates the command line that starts each script to 255 characters, which may cause problems. Examine the OpenVPN log in Halonet's \"VPN Details...\" window carefully.\n");
         }
         
 		NSString * upOrRouteUpOption = (  ((bitMask & OPENVPNSTART_USE_ROUTE_UP_NOT_UP) != 0)
@@ -2499,7 +2499,7 @@ int startVPN(NSString * configFile,
             BOOL openvpnHasRoutePreDown = (NSOrderedDescending == [[versionToUse substringToIndex: 3] compare: @"2.2"]);
             if (   customRoutePreDownScript
                 && (  ! openvpnHasRoutePreDown )  ) {
-                fprintf(stderr, "Your 'Tunnelblick VPN Configuration' or 'Deployed' configuration includes a 'route-pre-down.tunnelblick.sh' file,"
+                fprintf(stderr, "Your 'Halonet VPN Configuration' or 'Deployed' configuration includes a 'route-pre-down.halonet.sh' file,"
                         " which requires OpenVPN's '--route-pre-down' option. That option is not available in OpenVPN version %s, it is only available"
                         " in OpenVPN version 2.3alpha1 and higher.", [versionToUse UTF8String]);
                 exitOpenvpnstart(231);
@@ -2508,19 +2508,19 @@ int startVPN(NSString * configFile,
             if (  openvpnHasRoutePreDown ) {
                 if (  (useScripts & OPENVPNSTART_USE_SCRIPTS_USE_DOWN_ROOT) != 0  ) {
                     if (  customRoutePreDownScript  ) {
-                        fprintf(stderr, "Warning: Tunnelblick is using 'openvpn-down-root.so', so the custom route-pre-down script will not"
+                        fprintf(stderr, "Warning: Halonet is using 'openvpn-down-root.so', so the custom route-pre-down script will not"
                                 " be executed as root unless the 'user' and 'group' options are removed from the OpenVPN configuration file.");
                     } else {
 						if (   ((bitMask & OPENVPNSTART_DISABLE_INTERNET_ACCESS) != 0)
 							|| ((bitMask & OPENVPNSTART_DISABLE_INTERNET_ACCESS_UNEXPECTED) != 0)  ) {
-							fprintf(stderr, "Error: Tunnelblick is using 'openvpn-down-root.so', so 'Disable network access after disconnecting'"
+							fprintf(stderr, "Error: Halonet is using 'openvpn-down-root.so', so 'Disable network access after disconnecting'"
 									" will not work because the 'route-pre-down script' will not be executed as root. Remove the 'user' and 'group' options"
 									" from the OpenVPN configuration file to allow 'Disable network access after disconnecting' to work.");
 							exitOpenvpnstart(170);
 						} else {
-							fprintf(stderr, "Warning: Tunnelblick is using 'openvpn-down-root.so', so the route-pre-down script will not be used."
-									" You can override this by providing a custom route-pre-down script (which may be a copy of Tunnelblick's standard"
-									" route-pre-down script) in a Tunnelblick VPN Configuration. However, that script will not be executed as root"
+							fprintf(stderr, "Warning: Halonet is using 'openvpn-down-root.so', so the route-pre-down script will not be used."
+									" You can override this by providing a custom route-pre-down script (which may be a copy of Halonet's standard"
+									" route-pre-down script) in a Halonet VPN Configuration. However, that script will not be executed as root"
 									" unless the 'user' and 'group' options are removed from the OpenVPN configuration file. If the 'user' and 'group'"
 									" options are removed, then you don't need to use a custom route-pre-down script.");
 						}
@@ -2566,7 +2566,7 @@ int startVPN(NSString * configFile,
 		}
     }
 	
-    // Unload foo.tun/tap iff we are loading the new net.tunnelblick.tun/tap and foo.tun/tap are loaded
+    // Unload foo.tun/tap iff we are loading the new net.halonet.tun/tap and foo.tun/tap are loaded
     unsigned unloadMask  = 0;
     unsigned loadedKexts = getLoadedKextsMask();
     
@@ -2584,7 +2584,7 @@ int startVPN(NSString * configFile,
         unloadKexts( unloadMask );
     }
     
-    // Load the new net.tunnelblick.tun/tap if bitMask says to and they aren't already loaded
+    // Load the new net.halonet.tun/tap if bitMask says to and they aren't already loaded
     unsigned loadMask = bitMask & (OPENVPNSTART_OUR_TAP_KEXT | OPENVPNSTART_OUR_TUN_KEXT);
     if (  (loadedKexts & OPENVPNSTART_OUR_TAP_KEXT) != 0   ) {
         loadMask = loadMask & ( ~ OPENVPNSTART_OUR_TAP_KEXT );
@@ -2784,7 +2784,7 @@ void validateCfgLocCode(unsigned cfgLocCode) {
             
         case CFG_LOC_DEPLOY:
             if (  ! [[NSFileManager defaultManager] fileExistsAtPath: gDeployPath]  ) {
-                fprintf(stderr, "cfgLocCode = deployed but this is not a Deployed version of Tunnelblick\n");
+                fprintf(stderr, "cfgLocCode = deployed but this is not a Deployed version of Halonet\n");
                 exitOpenvpnstart(185);
             }
             break;
@@ -2891,11 +2891,11 @@ void validateEnvironment(void) {
 int main(int argc, char * argv[]) {
     pool = [[NSAutoreleasePool alloc] init];
 	
-    // Tunnelblick starts this program one of the following two ways:
+    // Halonet starts this program one of the following two ways:
     //
-    // This program is started by tunnelblickd: It is entered with uid = 0;   euid = <user-id>; gid = 0; egid = <group-id>
+    // This program is started by halonetd: It is entered with uid = 0;   euid = <user-id>; gid = 0; egid = <group-id>
     //
-    // where <user-id> and <group-id> are the user/group of the user who sent a request to tunnelblickd (possibly 0:0)
+    // where <user-id> and <group-id> are the user/group of the user who sent a request to halonetd (possibly 0:0)
     //
     // This program may also be startd via 'sudo' in Terminal, in which chase uid = euid = gid = egid = 0.
     // If run via via 'sudo', this program may not run any subcommands that require access to the user's data (such as 'revertToShadow').
@@ -2912,18 +2912,18 @@ int main(int argc, char * argv[]) {
 	gUserHome = [NSHomeDirectory() copy];
 	
     if (  originalUid == 0  ) {
-        // Started by tunnelblickd or 'sudo'
+        // Started by halonetd or 'sudo'
         gUidOfUser = originalEuid; // User's uid or 0 if started by 'sudo'
     } else if (  originalEuid == 0  ) {
         gUidOfUser = originalUid;  // User's uid
     } else {
-        fprintf(stderr, "uid is not 0 and euid is not 0 --Tunnelblick has probably not been secured. Secure it by launching Tunnelblick.");
+        fprintf(stderr, "uid is not 0 and euid is not 0 --Halonet has probably not been secured. Secure it by launching Halonet.");
         exitOpenvpnstart(174);
     }
 
     gPendingRootCounter = 1;    // Set up as root initially
     if (  setuid(0) != 0  ) {
-        fprintf(stderr, "setuid(0) failed; Tunnelblick has probably not been secured. Secure it by launching Tunnelblick.");
+        fprintf(stderr, "setuid(0) failed; Halonet has probably not been secured. Secure it by launching Halonet.");
     }
 
     
@@ -2946,22 +2946,22 @@ int main(int argc, char * argv[]) {
 			[args appendFormat: @" %s", argv[ix]];
 		}
 	}
-    fprintf(stderr, "WARNING: This is an insecure copy of tunnelblick-helper to be used for debugging only!\nopenvpnstart arguments: %s\n", [args UTF8String]);
+    fprintf(stderr, "WARNING: This is an insecure copy of halonet-helper to be used for debugging only!\nopenvpnstart arguments: %s\n", [args UTF8String]);
 #else
     if (   ([execComponents count] != 5)
         || [[execComponents objectAtIndex: 0] isNotEqualTo: @"/"]
         || [[execComponents objectAtIndex: 1] isNotEqualTo: @"Applications"]
-        //                                                  Allow any name for Tunnelblick.app
+        //                                                  Allow any name for Halonet.app
         || [[execComponents objectAtIndex: 3] isNotEqualTo: @"Contents"]
         || [[execComponents objectAtIndex: 4] isNotEqualTo: @"Resources"]
         ) {
-        fprintf(stderr, "Tunnelblick must be in /Applications (bundlePath = %s)\n", [gResourcesPath UTF8String]);
+        fprintf(stderr, "Halonet must be in /Applications (bundlePath = %s)\n", [gResourcesPath UTF8String]);
         exitOpenvpnstart(243);
     }
-    NSString * ourPath = [gResourcesPath stringByAppendingPathComponent: @"tunnelblick-helper"];
+    NSString * ourPath = [gResourcesPath stringByAppendingPathComponent: @"halonet-helper"];
     if (  pathIsNotSecure(ourPath, PERMS_SECURED_EXECUTABLE)  ) {
-        fprintf(stderr, "tunnelblick-helper and the path to it have not been secured\n"
-                "You must have run Tunnelblick and entered a computer administrator password at least once to use tunnelblick-helper\n");
+        fprintf(stderr, "halonet-helper and the path to it have not been secured\n"
+                "You must have run Halonet and entered a computer administrator password at least once to use halonet-helper\n");
         exitOpenvpnstart(244);
     }
 #endif

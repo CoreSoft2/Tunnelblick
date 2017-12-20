@@ -2,7 +2,7 @@
 # Note: must be bash; uses bash-specific tricks
 #
 # ******************************************************************************************************************
-# This Tunnelblick script does everything! It handles TUN and TAP interfaces, 
+# This Halonet script does everything! It handles TUN and TAP interfaces, 
 # pushed configurations and DHCP leases. :)
 # 
 # This is the "route-pre-down" version of the script, executed before the connection is closed.
@@ -31,7 +31,7 @@ disableNetworkAccess()
 	# Appends list of services that were disabled (including Wi-Fi) to a file which is used by
 	# re-enable-network-services.sh to re-enable network services that were disabled by this script.
 
-	expected_path="/Library/Application Support/Tunnelblick/expect-disconnect.txt"
+	expected_path="/Library/Application Support/Halonet/expect-disconnect.txt"
 
 	if [ -e "$expected_path" ] ; then
 		# Don't remove the file here; the down script will remove the file after testing it
@@ -44,7 +44,7 @@ disableNetworkAccess()
 		return
 	fi
 
-	list_path="/Library/Application Support/Tunnelblick/disabled-network-services.txt"
+	list_path="/Library/Application Support/Halonet/disabled-network-services.txt"
 
 	# Get list of services (remove the first line which contains a heading)
 	dia_services="$( networksetup  -listallnetworkservices | sed -e '1,1d')"
@@ -91,13 +91,13 @@ logMessage "Start of output from ${OUR_NAME}"
 # Test for the "-k" and "-ku" Tunnelbick options (Disable network access after disconnecting).
 # Usually we get the value for that option (and the other options) from State:/Network/OpenVPN,
 # but that key may not exist (because, for example, there were no DNS changes).
-# So we get the value from the Tunnelblick options passed to this script by OpenVPN.
+# So we get the value from the Halonet options passed to this script by OpenVPN.
 ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING="false"
 ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING_UNEXPECTED="false"
 while [ {$#} ] ; do
 
-	if [ "${1:0:1}" != "-" ] ; then				# Tunnelblick arguments start with "-" and come first
-		break                                   # so if this one doesn't start with "-" we are done processing Tunnelblick arguments
+	if [ "${1:0:1}" != "-" ] ; then				# Halonet arguments start with "-" and come first
+		break                                   # so if this one doesn't start with "-" we are done processing Halonet arguments
 	fi
 
 	if [ "$1" = "-k" ] ; then
@@ -116,7 +116,7 @@ readonly ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING ARG_DISABLE_INTERNET_AC
 if ! scutil -w State:/Network/OpenVPN &>/dev/null -t 1 ; then
 
 	# Configuration isn't there
-	logMessage "WARNING: Not restoring DNS settings because no saved Tunnelblick DNS information was found."
+	logMessage "WARNING: Not restoring DNS settings because no saved Halonet DNS information was found."
 
 	disableNetworkAccess $ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING $ARG_DISABLE_INTERNET_ACCESS_AFTER_DISCONNECTING_UNEXPECTED
 
@@ -125,29 +125,29 @@ if ! scutil -w State:/Network/OpenVPN &>/dev/null -t 1 ; then
 	exit 0
 fi
 
-# NOTE: This script does not use any arguments passed to it by OpenVPN, so it doesn't shift Tunnelblick options out of the argument list
+# NOTE: This script does not use any arguments passed to it by OpenVPN, so it doesn't shift Halonet options out of the argument list
 
 # Get info saved by the up script
-TUNNELBLICK_CONFIG="$( scutil <<-EOF
+HALONET_CONFIG="$( scutil <<-EOF
 	open
 	show State:/Network/OpenVPN
 	quit
 EOF
 )"
 
-ARG_MONITOR_NETWORK_CONFIGURATION="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*MonitorNetwork :' | sed -e 's/^.*: //g')"
-LEASEWATCHER_PLIST_PATH="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*LeaseWatcherPlistPath :' | sed -e 's/^.*: //g')"
-REMOVE_LEASEWATCHER_PLIST="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RemoveLeaseWatcherPlist :' | sed -e 's/^.*: //g')"
-PSID="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*Service :' | sed -e 's/^.*: //g')"
-# Don't need: SCRIPT_LOG_FILE="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*ScriptLogFile :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_RESTORE_ON_DNS_RESET="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RestoreOnDNSReset :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_RESTORE_ON_WINS_RESET="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RestoreOnWINSReset :' | sed -e 's/^.*: //g')"
-# Don't need: PROCESS="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*PID :' | sed -e 's/^.*: //g')"
-# Don't need: ARG_IGNORE_OPTION_FLAGS="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*IgnoreOptionFlags :' | sed -e 's/^.*: //g')"
-ARG_TAP="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*IsTapInterface :' | sed -e 's/^.*: //g')"
+ARG_MONITOR_NETWORK_CONFIGURATION="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*MonitorNetwork :' | sed -e 's/^.*: //g')"
+LEASEWATCHER_PLIST_PATH="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*LeaseWatcherPlistPath :' | sed -e 's/^.*: //g')"
+REMOVE_LEASEWATCHER_PLIST="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RemoveLeaseWatcherPlist :' | sed -e 's/^.*: //g')"
+PSID="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*Service :' | sed -e 's/^.*: //g')"
+# Don't need: SCRIPT_LOG_FILE="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*ScriptLogFile :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_RESTORE_ON_DNS_RESET="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RestoreOnDNSReset :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_RESTORE_ON_WINS_RESET="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RestoreOnWINSReset :' | sed -e 's/^.*: //g')"
+# Don't need: PROCESS="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*PID :' | sed -e 's/^.*: //g')"
+# Don't need: ARG_IGNORE_OPTION_FLAGS="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*IgnoreOptionFlags :' | sed -e 's/^.*: //g')"
+ARG_TAP="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*IsTapInterface :' | sed -e 's/^.*: //g')"
 
-bRouteGatewayIsDhcp="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*RouteGatewayIsDhcp :' | sed -e 's/^.*: //g')"
-sTunnelDevice="$(echo "${TUNNELBLICK_CONFIG}" | grep -i '^[[:space:]]*TunnelDevice :' | sed -e 's/^.*: //g')"
+bRouteGatewayIsDhcp="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*RouteGatewayIsDhcp :' | sed -e 's/^.*: //g')"
+sTunnelDevice="$(echo "${HALONET_CONFIG}" | grep -i '^[[:space:]]*TunnelDevice :' | sed -e 's/^.*: //g')"
 
 if ${ARG_TAP} ; then
 	if [ "$bRouteGatewayIsDhcp" == "true" ]; then
@@ -184,7 +184,7 @@ EOF
             
         # Release the DHCP lease
         if [ -z "$dev" ]; then
-            # If $dev is not defined, then use TunnelDevice, which was set from $dev by client.up.tunnelblick.sh
+            # If $dev is not defined, then use TunnelDevice, which was set from $dev by client.up.halonet.sh
             # ($dev is not defined when this script is called from MenuController to clean up when OpenVPN has crashed)
             if [ -n "${sTunnelDevice}" ]; then
                 logMessage "ERROR: \$dev not defined; using TunnelDevice: ${sTunnelDevice}"

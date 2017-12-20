@@ -175,7 +175,7 @@ on ReplaceLastPathComponent(path, newLastComponent) -- (String,String) as String
 	end repeat
 	
 	if lastColonIx = -1 then
-		display alert (localized string of "Tunnelblick Uninstaller FAILED") Â
+		display alert (localized string of "Halonet Uninstaller FAILED") Â
 			message LocalizedFormattedString("There is a problem. The path to this script (%s) does not contain any colons", {path}) Â
 			as critical
 		return ""
@@ -207,9 +207,9 @@ on GetMyScriptPath() -- As POSIX path
 	
 	-- Set myScriptPath
 	if lastFour = ".app" then
-		set myScriptPath to myPath & ":Contents:Resources:tunnelblick-uninstaller.sh"
+		set myScriptPath to myPath & ":Contents:Resources:halonet-uninstaller.sh"
 	else
-		set myScriptPath to ReplaceLastPathComponent(myPath, "tunnelblick-uninstaller.sh")
+		set myScriptPath to ReplaceLastPathComponent(myPath, "halonet-uninstaller.sh")
 		if myScriptPath = "" then
 			return ""
 		end if
@@ -220,7 +220,7 @@ on GetMyScriptPath() -- As POSIX path
 		return POSIX path of myScriptPath
 	end if
 	
-	display alert (localized string of "Tunnelblick Uninstaller FAILED") Â
+	display alert (localized string of "halonet Uninstaller FAILED") Â
 		message LocalizedFormattedString("There is a problem. The uninstaller shell script does not exist at %s", {myScriptPath}) Â
 		as critical
 	return ""
@@ -242,7 +242,7 @@ on NameToUninstall(fullPath) -- (String) as String
 			if (TBName = "") then
 				set TBName to GetLastPathComponentWithoutDotApp(fullPath)
 			end if
-			set alertResult to display alert (localized string of "Tunnelblick Uninstaller") Â
+			set alertResult to display alert (localized string of "halonet Uninstaller") Â
 				message LocalizedFormattedString("%s
 
 is damaged (it does not include 'openvpnstart') or is not a Tunnelblick-based application.
@@ -256,7 +256,7 @@ Do you wish to continue, and try to uninstall items associated with '%s'?", {ful
 		end if
 		return TBName
 	else
-		display alert (localized string of "Tunnelblick Uninstaller FAILED") Â
+		display alert (localized string of "halonet Uninstaller FAILED") Â
 			message LocalizedFormattedString("Internal error: %s
 
 does not exist or is not a folder", {fullPath}) Â
@@ -277,7 +277,7 @@ on IdentifierToUninstall(fullPath, TBName) -- (String, String) as String
 		-- Get the CFBundleIdentifier from /Contents/Info.plist, or use net.tunnelblick.tunnelblick
 		set TBIdentifier to GetIdentifier(fullPath)
 		if (TBIdentifier = "") then
-			set alertResult to display alert (localized string of "Tunnelblick Uninstaller") Â
+			set alertResult to display alert (localized string of "halonet Uninstaller") Â
 				message LocalizedFormattedString("%s
 
 is damaged (it does not have a 'CFBundleIdentifier') or not present.
@@ -292,7 +292,7 @@ Do you wish to continue, and try to uninstall items associated with '%s' and OS 
 		end if
 		return TBIdentifier
 	else
-		display alert (localized string of "Tunnelblick Uninstaller FAILED") Â
+		display alert (localized string of "halonet Uninstaller FAILED") Â
 			message LocalizedFormattedString("Internal error: %s
 
 does not exist or is not a folder", {fullPath}) Â
@@ -366,7 +366,7 @@ end IsOpenvpnRunning
 on QuitOpenVPN(TBName) -- (String) as Boolean
 	
 	repeat while IsOpenvpnRunning()
-		set alertResult to display alert (localized string of "Tunnelblick Uninstaller") Â
+		set alertResult to display alert (localized string of "halonet Uninstaller") Â
 			message (LocalizedFormattedString("%s cannot be uninstalled while OpenVPN is running.
 
 " & Â
@@ -394,7 +394,7 @@ end QuitOpenVPN
 on UserConfirmation(fullPath, TBName, TBIdentifier) -- (String, String, String) as String
 	
 	if FileOrFolderExists(fullPath) then
-		set alertResult to display alert (localized string of "Tunnelblick Uninstaller") Â
+		set alertResult to display alert (localized string of "halonet Uninstaller") Â
 			message (LocalizedFormattedString("'%s'
 	with OS X identifier '%s'
 	at '%s'
@@ -417,7 +417,7 @@ on UserConfirmation(fullPath, TBName, TBIdentifier) -- (String, String, String) 
 			as critical Â
 			buttons {localized string of "Uninstall", localized string of "Test", localized string of "Cancel"}
 	else
-		set alertResult to display alert (localized string of "Tunnelblick Uninstaller") Â
+		set alertResult to display alert (localized string of "halonet Uninstaller") Â
 			message (LocalizedFormattedString("'%s'
 	with OS X identifier '%s'
 
@@ -452,12 +452,12 @@ on UserConfirmation(fullPath, TBName, TBIdentifier) -- (String, String, String) 
 end UserConfirmation
 
 ------------------------------------------------------------------------------------------------------------------
--- ProcessFile: Function uninstalls one Tunnelblick.app and displays results to the user
+-- ProcessFile: Function uninstalls one halonet.app and displays results to the user
 ------------------------------------------------------------------------------------------------------------------
 on DoProcessing(theName, theBundleId, thePath, testFlag, myScriptPath) -- (String, String, String, Boolean, String)
 	
 	if testFlag then
-		display dialog LocalizedFormattedString("Although the next window will ask for a computer administrator username and password and say \"Tunnelblick Uninstaller wants to make changes\",
+		display dialog LocalizedFormattedString("Although the next window will ask for a computer administrator username and password and say \"halonet Uninstaller wants to make changes\",
 
 NO CHANGES WILL BE MADE.
 
@@ -486,12 +486,12 @@ Uninstalling may take SEVERAL MINUTES because it uses a secure erase process. Du
 	if (scriptOutput contains "Problem: ") Â
 		or (scriptOutput contains "Error: ") then
 		if testFlag then
-			set alertResult to display alert (localized string of "Tunnelblick Uninstaller TEST FAILED") Â
+			set alertResult to display alert (localized string of "halonet Uninstaller TEST FAILED") Â
 				message LocalizedFormattedString("One or more errors occurred during the %s uninstall test.", {theName}) Â
 				as critical Â
 				buttons {localized string of "OK", localized string of "Details"}
 		else
-			set alertResult to display alert (localized string of "Tunnelblick Uninstaller FAILED") Â
+			set alertResult to display alert (localized string of "halonet Uninstaller FAILED") Â
 				message LocalizedFormattedString("One or more errors occurred while uninstalling %s.", {theName}) Â
 				as critical Â
 				buttons {localized string of "OK", localized string of "Details"}
@@ -521,7 +521,7 @@ end DoProcessing
 
 
 ------------------------------------------------------------------------------------------------------------------
--- ProcessFile: Function uninstalls one Tunnelblick.app and displays results to the user
+-- ProcessFile: Function uninstalls one halonet.app and displays results to the user
 ------------------------------------------------------------------------------------------------------------------
 on ProcessFile(fullPath) -- (POSIX path)
 	
@@ -536,8 +536,8 @@ on ProcessFile(fullPath) -- (POSIX path)
 			return
 		end if
 	else
-		set TBName to "Tunnelblick"
-		set TBIdentifier to "net.tunnelblick.tunnelblick"
+		set TBName to "Halonet"
+		set TBIdentifier to "com.pivot.security.halo.net"
 	end if
 	
 	if not QuitApplication(TBName) then

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE dictionary SYSTEM "file://localhost/System/Library/DTDs/sdef.dtd">
-<dictionary title="Tunnelblick Terminology">
-	<suite name="Tunnelblick Suite" code="tblk" description="Tunnelblick AppleScript support">
+<dictionary title="Halonet Terminology">
+	<suite name="Halonet Suite" code="tblk" description="Halonet AppleScript support">
 		
 		<class name="application" code="capp" description="">
 			<cocoa class="NSApplication"/>
@@ -22,17 +22,17 @@
 				<cocoa key="state"/>
 			</property>
 			
-			<property name="autoconnect" code="TBac" type="text" access="r" description="'LAUNCH' means the configuration will be connected automatically when Tunnelblick launches. 'START' means the configuration will be connected automatically when the computer starts. 'NO' means the configuration will not be connected automatically.">
+			<property name="autoconnect" code="TBac" type="text" access="r" description="'LAUNCH' means the configuration will be connected automatically when Halonet launches. 'START' means the configuration will be connected automatically when the computer starts. 'NO' means the configuration will not be connected automatically.">
 				<cocoa key="autoConnect"/>
 			</property>
 			
 			<property name="bytesIn" code="TBbi" type="text" access="r"
-				      description="The number of bytes that have come in through the connection since Tunnelblick was launched. (For client configurations only. This will return '0' for configurations that are functioning as a server.)">
+				      description="The number of bytes that have come in through the connection since Halonet was launched. (For client configurations only. This will return '0' for configurations that are functioning as a server.)">
 				<cocoa key="bytesIn"/>
 			</property>
 			
 			<property name="bytesOut" code="TBbo" type="text" access="r"
-				      description="The number of bytes that have gone out through the connection since Tunnelblick was launched. (For client configurations only. This will return '0' for configurations that are functioning as a server.)">
+				      description="The number of bytes that have gone out through the connection since Halonet was launched. (For client configurations only. This will return '0' for configurations that are functioning as a server.)">
 				<cocoa key="bytesOut"/>
 			</property>
 		
@@ -65,7 +65,7 @@
 			<result type="integer" description="Returns the number of configurations for which a disconnection is being attempted."/>
 		</command>
 		
-		<command name="quit" code="TBLKQuit" description="Quit Tunnelblick gracefully.">
+		<command name="quit" code="TBLKQuit" description="Quit Halonet gracefully.">
 			<cocoa class="ApplescriptQuit"/>
 			<result type="integer" description="Returns 0."/>
 		</command>

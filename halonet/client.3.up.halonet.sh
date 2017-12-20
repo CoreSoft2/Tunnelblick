@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# 2011-04-18 Changed from client.up.tunnelblick.sh to client.3.up.tunnelblick.sh and to use leasewatch3
+# 2011-04-18 Changed from client.up.halonet.sh to client.3.up.halonet.sh and to use leasewatch3
 
 trap "" TSTP
 trap "" HUP
@@ -9,14 +9,14 @@ export PATH="/bin:/sbin:/usr/sbin:/usr/bin"
 
 # Process optional arguments (if any) for the script
 # Each one begins with a "-"
-# They come from Tunnelblick, and come first, before the OpenVPN arguments
+# They come from Halonet, and come first, before the OpenVPN arguments
 # So we set ARG_ script variables to their values and shift them out of the argument list
 # When we're done, only the OpenVPN arguments remain for the rest of the script to use
 ARG_MONITOR_NETWORK_CONFIGURATION="false"
 ARG_RESTORE_ON_DNS_RESET="false"
 ARG_RESTORE_ON_WINS_RESET="false"
 ARG_TAP="false"
-ARG_TB_PATH="/Applications/Tunnelblick.app"
+ARG_TB_PATH="/Applications/Halonet.app"
 
 while [ {$#} ] ; do
     if [  "$1" = "-m" ] ; then                              # Handle the arguments we know about
@@ -32,10 +32,10 @@ while [ {$#} ] ; do
         ARG_TAP="true"
         shift
     elif [ "${1:0:2}" = "-t" ] ; then
-        ARG_TB_PATH="${1:2}"				                # -t path of Tunnelblick.app
+        ARG_TB_PATH="${1:2}"				                # -t path of Halonet.app
     shift
     else
-        if [  "${1:0:1}" = "-" ] ; then                     # Shift out Tunnelblick arguments (they start with "-") that we don't understand
+        if [  "${1:0:1}" = "-" ] ; then                     # Shift out Halonet arguments (they start with "-") that we don't understand
             shift                                           # so the rest of the script sees only the OpenVPN arguments                            
         else
             break
@@ -45,28 +45,28 @@ done
 
 TBCONFIG="$config"
 # Note: The script log path name is constructed from the path of the regular config file, not the shadow copy
-# if the config is shadow copy, e.g. /Library/Application Support/Tunnelblick/Users/Jonathan/Folder/Subfolder/config.ovpn
-# then convert to regular config     /Users/Jonathan/Library/Application Support/Tunnelblick/Configurations/Folder/Subfolder/config.ovpn
+# if the config is shadow copy, e.g. /Library/Application Support/Halonet/Users/Jonathan/Folder/Subfolder/config.ovpn
+# then convert to regular config     /Users/Jonathan/Library/Application Support/Halonet/Configurations/Folder/Subfolder/config.ovpn
 #      to get the script log path
 # "/Users/..." works even if the home directory has a different path; it is used in the name of the log file, and is not used as a path to get to anything.
-TBALTPREFIX="/Library/Application Support/Tunnelblick/Users/"
+TBALTPREFIX="/Library/Application Support/Halonet/Users/"
 TBALTPREFIXLEN="${#TBALTPREFIX}"
 TBCONFIGSTART="${TBCONFIG:0:$TBALTPREFIXLEN}"
 if [ "$TBCONFIGSTART" = "$TBALTPREFIX" ] ; then
     TBBASE="${TBCONFIG:$TBALTPREFIXLEN}"
     TBSUFFIX="${TBBASE#*/}"
     TBUSERNAME="${TBBASE%%/*}"
-    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Tunnelblick/Configurations/$TBSUFFIX"
+    TBCONFIG="/Users/$TBUSERNAME/Library/Application Support/Halonet/Configurations/$TBSUFFIX"
 fi
 
 CONFIG_PATH_DASHES_SLASHES="$(echo "${TBCONFIG}" | sed -e 's/-/--/g' | sed -e 's/\//-S/g')"
-SCRIPT_LOG_FILE="/Library/Application Support/Tunnelblick/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
+SCRIPT_LOG_FILE="/Library/Application Support/Halonet/Logs/${CONFIG_PATH_DASHES_SLASHES}.script.log"
 
 # Do something only if the server pushed something
 if [ "$foreign_option_1" == "" ]; then
-    echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: No network configuration changes need to be made" >> "${SCRIPT_LOG_FILE}"
+    echo "$(date '+%a %b %e %T %Y') *Halonet client.3.up.halonet.sh: No network configuration changes need to be made" >> "${SCRIPT_LOG_FILE}"
     if ${ARG_MONITOR_NETWORK_CONFIGURATION} ; then
-        echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Will NOT monitor for other network configuration changes" >> "${SCRIPT_LOG_FILE}"
+        echo "$(date '+%a %b %e %T %Y') *Halonet client.3.up.halonet.sh: Will NOT monitor for other network configuration changes" >> "${SCRIPT_LOG_FILE}"
     fi
 	exit 0
 fi
@@ -77,12 +77,12 @@ trim() {
 
 readonly TB_RESOURCES_PATH="${ARG_TB_PATH}/Contents/Resources"
 
-if [ "${ARG_TB_PATH}" = "/Applications/Tunnelblick.app" ] ; then
+if [ "${ARG_TB_PATH}" = "/Applications/Halonet.app" ] ; then
     readonly LEASEWATCHER_PLIST_PATH="${TB_RESOURCES_PATH}/LeaseWatch3.plist"
     readonly LEASEWATCHER_TEMPLATE_PATH=""
     readonly REMOVE_LEASEWATCHER_PLIST="false"
 else
-    readonly LEASEWATCHER_PLIST_PATH="/Library/Application Support/Tunnelblick/LeaseWatch3.plist"
+    readonly LEASEWATCHER_PLIST_PATH="/Library/Application Support/Halonet/LeaseWatch3.plist"
     readonly LEASEWATCHER_TEMPLATE_PATH="${TB_RESOURCES_PATH}/LeaseWatch3.plist"
     readonly REMOVE_LEASEWATCHER_PLIST="true"
 fi
@@ -287,11 +287,11 @@ if [ -z "${ALL_WINS}" ] ; then
 fi
 
 # Now, do the aggregation
-# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from Tunnelblick,
+# Save the openvpn process ID and the Network Primary Service ID, leasewather.plist path, logfile path, and optional arguments from Halonet,
 # then save old and new DNS and WINS settings
 # PPID is a bash-script variable that contains the process ID of the parent of the process running the script (i.e., OpenVPN's process ID)
 # config is an environmental variable set to the configuration path by OpenVPN prior to running this up script
-echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Up to two 'No such key' warnings are normal and may be ignored" >> "${SCRIPT_LOG_FILE}"
+echo "$(date '+%a %b %e %T %Y') *Halonet client.3.up.halonet.sh: Up to two 'No such key' warnings are normal and may be ignored" >> "${SCRIPT_LOG_FILE}"
 scutil <<- EOF
 	open
 	d.init
@@ -306,14 +306,14 @@ scutil <<- EOF
 	set State:/Network/OpenVPN
 
 	# First, back up the device's current DNS and WINS configurations
-    # Indicate 'no such key' by a dictionary with a single entry: "TunnelblickNoSuchKey : true"
+    # Indicate 'no such key' by a dictionary with a single entry: "HalonetNoSuchKey : true"
     d.init
-    d.add TunnelblickNoSuchKey true
+    d.add HalonetNoSuchKey true
     get State:/Network/Service/${PSID}/DNS
 	set State:/Network/OpenVPN/OldDNS
 	
     d.init
-    d.add TunnelblickNoSuchKey true
+    d.add HalonetNoSuchKey true
     get State:/Network/Service/${PSID}/SMB
 	set State:/Network/OpenVPN/OldSMB
 
@@ -352,14 +352,14 @@ scutil <<- EOF
 	quit
 EOF
 
-echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Saved the DNS and WINS configurations for later use" >> "${SCRIPT_LOG_FILE}"
+echo "$(date '+%a %b %e %T %Y') *Halonet client.3.up.halonet.sh: Saved the DNS and WINS configurations for later use" >> "${SCRIPT_LOG_FILE}"
 
 if ${ARG_MONITOR_NETWORK_CONFIGURATION} ; then
     if [ "${LEASEWATCHER_TEMPLATE_PATH}" != "" ] ; then
-        sed -e "s|/Applications/Tunnelblick/.app/Contents/Resources|${TB_RESOURCES_PATH}|g" "${LEASEWATCHER_TEMPLATE_PATH}" > "${LEASEWATCHER_PLIST_PATH}"
+        sed -e "s|/Applications/Halonet/.app/Contents/Resources|${TB_RESOURCES_PATH}|g" "${LEASEWATCHER_TEMPLATE_PATH}" > "${LEASEWATCHER_PLIST_PATH}"
     fi
     launchctl load "${LEASEWATCHER_PLIST_PATH}"
-    echo "$(date '+%a %b %e %T %Y') *Tunnelblick client.3.up.tunnelblick.sh: Set up to monitor system configuration with leasewatch" >> "${SCRIPT_LOG_FILE}"
+    echo "$(date '+%a %b %e %T %Y') *Halonet client.3.up.halonet.sh: Set up to monitor system configuration with leasewatch" >> "${SCRIPT_LOG_FILE}"
 fi
 
 exit 0
